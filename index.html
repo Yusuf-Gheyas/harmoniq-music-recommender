@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HarmoniQ – Personalized Music Recommendation System</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/player.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- LEFT SIDEBAR -->
+    <aside class="app-sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">🎵</div>
+        <div class="logo-text">HarmoniQ</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-title">Explore</span>
+        <a class="nav-item active" data-view="discover">
+          <span class="icon">✨</span>
+          <span>Discover</span>
+        </a>
+        <a class="nav-item" data-view="vibe">
+          <span class="icon">🎛️</span>
+          <span>Vibe & Mood</span>
+        </a>
+        <a class="nav-item" data-view="playlists">
+          <span class="icon">📑</span>
+          <span>Playlists</span>
+        </a>
+        <a class="nav-item" data-view="favorites">
+          <span class="icon">❤️</span>
+          <span>Liked Songs</span>
+        </a>
+
+        <span class="nav-section-title" style="margin-top: 14px;">Intelligence</span>
+        <a class="nav-item" data-view="analytics">
+          <span class="icon">📊</span>
+          <span>Music DNA</span>
+        </a>
+        <a class="nav-item" data-view="artist">
+          <span class="icon">🎙️</span>
+          <span>Artist Studio</span>
+        </a>
+        <a class="nav-item" data-view="admin">
+          <span class="icon">🛡️</span>
+          <span>Admin Center</span>
+        </a>
+      </nav>
+
+      <!-- Current User Profile in Sidebar -->
+      <div class="sidebar-user">
+        <div class="user-avatar" id="currentUserAvatar">🎧</div>
+        <div class="user-info">
+          <span class="user-name" id="currentUserName">Yusuf Gheyas</span>
+          <span class="user-role-badge" id="currentUserRole">LISTENER</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- TOP BAR -->
+    <header class="app-topbar">
+      <div class="topbar-search">
+        <span>🔍</span>
+        <input type="text" id="globalSearchInput" placeholder="Search title, artist, genre, mood... (Ctrl + K)">
+        <span class="search-shortcut">⌘K</span>
+      </div>
+
+      <div class="topbar-actions">
+        <!-- 1-Click Role Switcher for Academic Evaluation -->
+        <div class="role-switcher-container">
+          <span class="role-label">Switch Role:</span>
+          <select id="roleSelect" class="role-select" title="Switch active persona">
+            <option value="user_yusuf">Yusuf Gheyas (Listener)</option>
+            <option value="user_irshad">Irshad Rouf (Team Leader)</option>
+            <option value="user_arsh">Arsh Sharma (System Eng.)</option>
+            <option value="user_aura">Aura Luna (Artist / Creator)</option>
+            <option value="user_admin">Prof. Evaluator (Admin)</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN SCROLLABLE CONTENT -->
+    <main class="app-main">
+      <!-- 1. DISCOVER VIEW -->
+      <section id="view-discover" class="view-panel active">
+        <!-- Genre Filter Row -->
+        <div class="pill-row">
+          <button class="genre-pill active" data-genre="All">All Genres</button>
+          <button class="genre-pill" data-genre="Lofi">Lofi</button>
+          <button class="genre-pill" data-genre="Synthwave">Synthwave</button>
+          <button class="genre-pill" data-genre="Chillhop">Chillhop</button>
+          <button class="genre-pill" data-genre="Cyberpunk">Cyberpunk</button>
+          <button class="genre-pill" data-genre="Ambient">Ambient</button>
+          <button class="genre-pill" data-genre="Classical">Classical</button>
+          <button class="genre-pill" data-genre="EDM">EDM</button>
+          <button class="genre-pill" data-genre="Acoustic">Acoustic</button>
+          <button class="genre-pill" data-genre="Indie Pop">Indie Pop</button>
+        </div>
+
+        <!-- Section: Personalized Recommendations -->
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Made For You</h2>
+            <p class="section-subtitle">Real-time content-based acoustic vector scoring aligned with your listening profile</p>
+          </div>
+        </div>
+        <div class="track-grid" id="forYouTrackList">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Section: Trending & Catalog -->
+        <div class="section-header" style="margin-top: 36px;">
+          <div>
+            <h2 class="section-title">Trending & Full Catalog</h2>
+            <p class="section-subtitle">Explore popular tracks, new community releases, and verified artists</p>
+          </div>
+        </div>
+        <div class="track-grid" id="trendingTrackList">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- 2. VIBE & MOOD MATRIX VIEW -->
+      <section id="view-vibe" class="view-panel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Dynamic Vibe Matcher</h2>
+            <p class="section-subtitle">Fine-tune acoustic dimensions to find music that mirrors your present mood and mental state</p>
+          </div>
+          <button class="btn-primary" id="btnGenerateMix">✨ Generate AI Smart Mix</button>
+        </div>
+
+        <div class="vibe-matrix-card">
+          <!-- Mood Selection Row -->
+          <div class="pill-row" style="margin-bottom: 0;">
+            <button class="mood-pill active" data-mood="Chill">🌿 Chill & Calm</button>
+            <button class="mood-pill" data-mood="Focus">🧠 Deep Focus</button>
+            <button class="mood-pill" data-mood="Hype">🔥 Hype & Workout</button>
+            <button class="mood-pill" data-mood="Melancholy">🌧️ Melancholic</button>
+            <button class="mood-pill" data-mood="Dreamy">✨ Dreamy</button>
+            <button class="mood-pill" data-mood="Energetic">⚡ Energetic</button>
+            <button class="mood-pill" data-mood="Peaceful">🪵 Peaceful</button>
+          </div>
+
+          <!-- Dynamic Acoustic Dimension Sliders -->
+          <div class="slider-group">
+            <div class="slider-item">
+              <div class="slider-header">
+                <span>Target Tempo (BPM)</span>
+                <span class="slider-val" id="sliderBpmVal">90 BPM</span>
+              </div>
+              <input type="range" class="range-input" id="sliderBpm" min="60" max="150" value="90">
+            </div>
+
+            <div class="slider-item">
+              <div class="slider-header">
+                <span>Energy Dynamics</span>
+                <span class="slider-val" id="sliderEnergyVal">50%</span>
+              </div>
+              <input type="range" class="range-input" id="sliderEnergy" min="0.1" max="1.0" step="0.05" value="0.5">
+            </div>
+
+            <div class="slider-item">
+              <div class="slider-header">
+                <span>Valence (Positivity)</span>
+                <span class="slider-val" id="sliderValenceVal">55%</span>
+              </div>
+              <input type="range" class="range-input" id="sliderValence" min="0.1" max="1.0" step="0.05" value="0.55">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <h3 class="section-title" style="font-size: 18px;">Vibe-Calibrated Tracks</h3>
+        </div>
+        <div class="track-grid" id="vibeTrackList">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- 3. PLAYLISTS VIEW -->
+      <section id="view-playlists" class="view-panel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Your Playlists</h2>
+            <p class="section-subtitle">Curated collections, community mixes, and algorithmic playlists</p>
+          </div>
+          <button class="btn-primary" id="btnCreatePlaylist">➕ Create New Playlist</button>
+        </div>
+        <div class="playlists-grid" id="playlistsGrid">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- 4. FAVORITES / LIKED SONGS VIEW -->
+      <section id="view-favorites" class="view-panel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Liked Songs</h2>
+            <p class="section-subtitle">Your personal library of favorite tracks powering your taste recommendations</p>
+          </div>
+        </div>
+        <div class="track-grid" id="favoritesTrackList">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- 5. MUSIC DNA & ANALYTICS VIEW -->
+      <section id="view-analytics" class="view-panel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Music DNA & Taste Profiling</h2>
+            <p class="section-subtitle">Algorithmic analysis of your listening habits, acoustic footprint, and genre affinity</p>
+          </div>
+        </div>
+
+        <!-- Archetype Spotify-Wrapped style Banner -->
+        <div class="archetype-banner">
+          <div class="archetype-icon" id="archetypeIcon">🎧</div>
+          <div>
+            <span class="badge" style="background: rgba(0,242,254,0.2); color: var(--accent-cyan); margin-bottom: 6px; display: inline-block;">YOUR LISTENING ARCHETYPE</span>
+            <h3 id="archetypeTitle" style="font-size: 24px; font-weight: 800;">Eclectic Sonic Explorer</h3>
+            <p id="archetypeDesc" style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">You wander effortlessly across genres, chasing exceptional melodies wherever they live.</p>
+          </div>
+        </div>
+
+        <!-- KPI Metrics -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <span class="kpi-title">Tracks Streamed</span>
+            <span class="kpi-value" id="statHistoryCount">0</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-title">Liked Library</span>
+            <span class="kpi-value" id="statLikedCount">0</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-title">Listening Time</span>
+            <span class="kpi-value" id="statMinutes">0m</span>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <h4 style="font-size: 15px; font-weight: 700;">Acoustic Dimension Radar</h4>
+            <div id="radarChartContainer"></div>
+          </div>
+          <div class="analytics-card">
+            <h4 style="font-size: 15px; font-weight: 700;">Genre Breakdown</h4>
+            <div id="donutChartContainer"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. ARTIST STUDIO VIEW -->
+      <section id="view-artist" class="view-panel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Artist Studio Portal</h2>
+            <p class="section-subtitle">Publish original tracks, configure acoustic metadata, and track stream analytics</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 340px 1fr; gap: 28px; margin-bottom: 28px;">
+          <!-- Upload Form -->
+          <div class="modal-box" style="width: 100%; box-shadow: none;">
+            <h3 style="font-size: 16px; font-weight: 800;">Upload New Track</h3>
+            <form id="uploadTrackForm" style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="form-group">
+                <label>Track Title</label>
+                <input type="text" id="upTitle" class="form-control" placeholder="e.g. Celestial Horizon" required>
+              </div>
+              <div class="form-group">
+                <label>Artist Name</label>
+                <input type="text" id="upArtist" class="form-control" placeholder="Artist or Band name">
+              </div>
+              <div class="form-group">
+                <label>Album / EP</label>
+                <input type="text" id="upAlbum" class="form-control" placeholder="Single or Album name">
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                  <label>Genre</label>
+                  <select id="upGenre" class="form-control">
+                    <option value="Lofi">Lofi</option>
+                    <option value="Synthwave">Synthwave</option>
+                    <option value="Chillhop">Chillhop</option>
+                    <option value="Cyberpunk">Cyberpunk</option>
+                    <option value="Ambient">Ambient</option>
+                    <option value="Classical">Classical</option>
+                    <option value="EDM">EDM</option>
+                    <option value="Acoustic">Acoustic</option>
+                    <option value="Indie Pop">Indie Pop</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Mood</label>
+                  <select id="upMood" class="form-control">
+                    <option value="Chill">Chill</option>
+                    <option value="Focus">Focus</option>
+                    <option value="Hype">Hype</option>
+                    <option value="Melancholy">Melancholy</option>
+                    <option value="Dreamy">Dreamy</option>
+                    <option value="Energetic">Energetic</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                  <label>BPM</label>
+                  <input type="number" id="upBpm" class="form-control" value="85" min="50" max="180">
+                </div>
+                <div class="form-group">
+                  <label>Energy (0-1)</label>
+                  <input type="number" id="upEnergy" class="form-control" value="0.5" step="0.1" min="0" max="1">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Audio Synthesis Engine</label>
+                <select id="upSynth" class="form-control">
+                  <option value="lofi_chill">Web Audio Lofi Chords</option>
+                  <option value="synthwave_bass">Analog Synthwave Bass</option>
+                  <option value="piano_nocturne">Classical Piano Nocturne</option>
+                  <option value="ambient_pad">Neural Ambient Pad</option>
+                  <option value="cyber_groove">Cyber Sawtooth Beat</option>
+                  <option value="acoustic_strum">Warm Acoustic Strum</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Audio File URL (Optional)</label>
+                <input type="url" id="upAudioUrl" class="form-control" placeholder="https://...mp3 (or leave blank for Web Audio synth)">
+              </div>
+              <div class="form-group">
+                <label>Cover Icon</label>
+                <input type="text" id="upIcon" class="form-control" value="🎶" maxlength="2">
+              </div>
+              <div class="form-group">
+                <label>Lyrics (Sample line)</label>
+                <input type="text" id="upLyrics" class="form-control" placeholder="Opening line of lyrics...">
+              </div>
+              <button type="submit" class="btn-primary" style="margin-top: 8px;">Publish Track</button>
+            </form>
+          </div>
+
+          <!-- Catalog Table -->
+          <div class="analytics-card" style="align-items: stretch;">
+            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 12px;">Your Catalog Performance</h3>
+            <div id="artistTrackTable"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. ADMIN CENTER VIEW -->
+      <section id="view-admin" class="view-panel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">System Admin Dashboard</h2>
+            <p class="section-subtitle">Real-time platform metrics, user management, and system database controls</p>
+          </div>
+          <button class="btn-secondary" id="btnResetSystemData" style="color: #ff5858; border-color: rgba(255,88,88,0.3);">
+            ⚠️ Reset System Database
+          </button>
+        </div>
+
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <span class="kpi-title">Registered Users</span>
+            <span class="kpi-value" id="kpiTotalUsers">5</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-title">Catalog Tracks</span>
+            <span class="kpi-value" id="kpiTotalTracks">15</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-title">Total Plays</span>
+            <span class="kpi-value" id="kpiTotalPlays">0</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-title">Active Playlists</span>
+            <span class="kpi-value" id="kpiTotalPlaylists">3</span>
+          </div>
+        </div>
+
+        <div class="analytics-card" style="align-items: stretch;">
+          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 16px;">Platform User Directory & Role Permissions</h3>
+          <div id="adminUserTable"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- BOTTOM DOCKED AUDIO PLAYER -->
+    <footer class="app-player">
+      <!-- Left: Track info -->
+      <div class="player-left">
+        <div class="player-cover" id="playerCover">🌙</div>
+        <div class="player-info">
+          <span class="player-title" id="playerTitle">Midnight Reverie</span>
+          <span class="player-artist" id="playerArtist">Aura Luna • Nocturnal Echoes</span>
+        </div>
+        <button class="player-like-btn" id="playerLikeBtn" title="Like track">🤍</button>
+      </div>
+
+      <!-- Center: Controls and Seek Bar -->
+      <div class="player-center">
+        <div class="playback-controls">
+          <button class="control-btn" id="btnShuffle" title="Shuffle (S)">🔀</button>
+          <button class="control-btn" id="btnPrevTrack" title="Previous (P)">⏮</button>
+          <button class="control-btn btn-play-main" id="btnPlayPause" title="Play / Pause (Space)">▶</button>
+          <button class="control-btn" id="btnNextTrack" title="Next (N)">⏭</button>
+          <button class="control-btn" id="btnRepeat" title="Repeat (R)">🔁</button>
+        </div>
+        <div class="timeline-container">
+          <span class="time-text" id="playerCurrentTime">0:00</span>
+          <input type="range" class="seek-bar" id="playerSeek" min="0" max="100" value="0">
+          <span class="time-text" id="playerDurationTime">2:45</span>
+        </div>
+      </div>
+
+      <!-- Right: Spectrum Visualizer & Audio Tools -->
+      <div class="player-right">
+        <!-- Visualizer Canvas & Mode Switcher -->
+        <div class="visualizer-wrapper">
+          <canvas id="visualizerCanvas"></canvas>
+          <div class="vis-mode-switcher">
+            <button class="vis-mode-btn active" data-mode="bars">Bars</button>
+            <button class="vis-mode-btn" data-mode="radial">Radial</button>
+            <button class="vis-mode-btn" data-mode="wave">Wave</button>
+          </div>
+        </div>
+
+        <!-- Tool Buttons -->
+        <div class="tool-buttons">
+          <button class="btn-tool" id="btnToggleEq" title="5-Band Graphic Equalizer">🎚️</button>
+          <button class="btn-tool" id="btnToggleAmbient" title="Ambient Soundscape Mixer">🌧️</button>
+          <button class="btn-tool" id="btnToggleLyrics" title="Synchronized Lyrics">📜</button>
+        </div>
+
+        <!-- Volume -->
+        <div class="volume-container">
+          <button class="control-btn" id="btnMute" title="Mute (M)">🔊</button>
+          <input type="range" class="volume-slider" id="playerVolume" min="0" max="1" step="0.02" value="0.75">
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- SYNCHRONIZED LYRICS SLIDEOUT OVERLAY -->
+  <div class="lyrics-overlay" id="lyricsModal">
+    <div class="lyrics-header">
+      <h3 style="font-size: 16px; font-weight: 800;">Real-time Lyrics</h3>
+      <button class="btn-close-modal" id="btnCloseLyrics">✕</button>
+    </div>
+    <div class="lyrics-container" id="lyricsContent">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+
+  <!-- EQUALIZER MODAL -->
+  <div class="modal-overlay" id="eqModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">🎚️ 5-Band Graphic Equalizer</h3>
+        <button class="btn-close-modal">✕</button>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted);">Web Audio API BiquadFilterNode sound sculpting.</p>
+
+      <!-- Preset Pills -->
+      <div class="pill-row" style="margin-bottom: 0;">
+        <button class="genre-pill active eq-preset-btn" data-preset="flat">Flat</button>
+        <button class="genre-pill eq-preset-btn" data-preset="bass_boost">Bass Boost</button>
+        <button class="genre-pill eq-preset-btn" data-preset="vocal_boost">Vocal Clarity</button>
+        <button class="genre-pill eq-preset-btn" data-preset="treble_boost">Treble Boost</button>
+        <button class="genre-pill eq-preset-btn" data-preset="electronic">Electronic</button>
+      </div>
+
+      <!-- Sliders -->
+      <div class="eq-sliders-row">
+        <div class="eq-column">
+          <input type="range" class="eq-vertical-slider" id="eqBand0" min="-12" max="12" value="0" orient="vertical">
+          <span class="eq-freq-label">60 Hz</span>
+        </div>
+        <div class="eq-column">
+          <input type="range" class="eq-vertical-slider" id="eqBand1" min="-12" max="12" value="0" orient="vertical">
+          <span class="eq-freq-label">250 Hz</span>
+        </div>
+        <div class="eq-column">
+          <input type="range" class="eq-vertical-slider" id="eqBand2" min="-12" max="12" value="0" orient="vertical">
+          <span class="eq-freq-label">1 kHz</span>
+        </div>
+        <div class="eq-column">
+          <input type="range" class="eq-vertical-slider" id="eqBand3" min="-12" max="12" value="0" orient="vertical">
+          <span class="eq-freq-label">4 kHz</span>
+        </div>
+        <div class="eq-column">
+          <input type="range" class="eq-vertical-slider" id="eqBand4" min="-12" max="12" value="0" orient="vertical">
+          <span class="eq-freq-label">12 kHz</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AMBIENT SOUNDSCAPE MODAL -->
+  <div class="modal-overlay" id="ambientModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">🌧️ Ambient Soundscape Mixer</h3>
+        <button class="btn-close-modal">✕</button>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted);">Layer soothing background soundscapes over your music to enter deep flow.</p>
+
+      <div class="ambient-cards-grid">
+        <div class="ambient-card" data-preset="rain">
+          <span style="font-size: 32px;">🌧️</span>
+          <strong>Gentle Rain</strong>
+          <span style="font-size: 11px; color: var(--text-muted);">Pink Noise</span>
+        </div>
+        <div class="ambient-card" data-preset="cafe">
+          <span style="font-size: 32px;">☕</span>
+          <strong>Cozy Café</strong>
+          <span style="font-size: 11px; color: var(--text-muted);">Brown Noise</span>
+        </div>
+        <div class="ambient-card" data-preset="vinyl">
+          <span style="font-size: 32px;">📻</span>
+          <strong>Vinyl Static</strong>
+          <span style="font-size: 11px; color: var(--text-muted);">Dust & Crackle</span>
+        </div>
+      </div>
+
+      <div class="slider-item" style="margin-top: 10px;">
+        <div class="slider-header">
+          <span>Ambient Mix Level</span>
+        </div>
+        <input type="range" class="range-input" id="ambientVolumeSlider" min="0" max="0.8" step="0.05" value="0.25">
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE PLAYLIST MODAL -->
+  <div class="modal-overlay" id="newPlaylistModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Create New Playlist</h3>
+        <button class="btn-close-modal">✕</button>
+      </div>
+      <form id="newPlaylistForm" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label>Playlist Title</label>
+          <input type="text" id="plTitleInput" class="form-control" placeholder="e.g. Late Night Coding Vibes" required>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="plDescInput" class="form-control" placeholder="Describe the vibe of this playlist...">
+        </div>
+        <button type="submit" class="btn-primary" style="margin-top: 6px;">Create Playlist</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD TO PLAYLIST MODAL -->
+  <div class="modal-overlay" id="addToPlaylistModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Add to Playlist</h3>
+        <button class="btn-close-modal">✕</button>
+      </div>
+      <div id="playlistSelectList" style="display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto;">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- SCRIPTS LOAD ORDER -->
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/audioEngine.js"></script>
+  <script src="js/visualizer.js"></script>
+  <script src="js/lyrics.js"></script>
+  <script src="js/recommendationEngine.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
