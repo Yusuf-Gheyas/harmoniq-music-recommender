@@ -285,8 +285,8 @@ class UIManager {
       .map(
         pl => `
       <div class="playlist-card" data-id="${pl.id}">
-        <div class="playlist-cover" style="background: ${pl.coverGradient}">
-          <span class="cover-icon">🎶</span>
+        <div class="playlist-cover">
+          <img src="${pl.coverUrl}" class="playlist-cover-img" alt="${pl.title}">
           <button class="btn-play-playlist" data-id="${pl.id}" title="Play Playlist">▶</button>
         </div>
         <div class="playlist-meta">
@@ -414,7 +414,7 @@ class UIManager {
             <tr>
               <td>
                 <div class="table-track-cell">
-                  <div class="mini-cover" style="background: ${t.coverGradient}">${t.coverIcon}</div>
+                  <img src="${t.coverUrl}" class="mini-cover" alt="${t.title}">
                   <div>
                     <strong>${t.title}</strong>
                     <div class="muted-text">${t.album}</div>
@@ -513,13 +513,13 @@ class UIManager {
     const isLiked = storage.isTrackLiked(track.id);
     const matchBadge = track.matchScore ? `<span class="match-badge">🎯 ${track.matchScore}% Match</span>` : "";
     const reasonHTML = showReason && track.recommendationReason
-      ? `<div class="rec-reason"><span class="bulb">💡</span> ${track.recommendationReason}</div>`
+      ? `<div class="rec-reason">${track.recommendationReason}</div>`
       : "";
 
     return `
       <div class="track-card" data-id="${track.id}">
-        <div class="track-cover" style="background: ${track.coverGradient}">
-          <span class="cover-icon">${track.coverIcon}</span>
+        <div class="track-cover">
+          <img src="${track.coverUrl}" class="track-cover-img" alt="${track.title}" loading="lazy">
           <button class="btn-card-play" data-id="${track.id}" title="Play Track">▶</button>
           ${matchBadge}
         </div>
@@ -601,8 +601,7 @@ class UIManager {
     if (titleEl) titleEl.textContent = track.title;
     if (artistEl) artistEl.textContent = `${track.artist} • ${track.album}`;
     if (coverEl) {
-      coverEl.style.background = track.coverGradient;
-      coverEl.textContent = track.coverIcon;
+      coverEl.innerHTML = `<img src="${track.coverUrl}" class="player-cover-img" alt="${track.title}">`;
     }
     if (likeBtn) {
       const isLiked = storage.isTrackLiked(track.id);
@@ -835,7 +834,7 @@ class UIManager {
           bpm: parseInt(document.getElementById("upBpm").value) || 90,
           energy: parseFloat(document.getElementById("upEnergy").value) || 0.5,
           synthType: document.getElementById("upSynth").value,
-          coverIcon: document.getElementById("upIcon").value || "🎵",
+          coverUrl: document.getElementById("upCoverUrl")?.value || "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/71/12/03/711203e0-f7b9-9f4e-caff-540736fda45c/20UMGIM25005.rgb.jpg/600x600bb.jpg",
           audioUrl: document.getElementById("upAudioUrl").value || "",
           lyrics: [
             { time: 5, text: document.getElementById("upLyrics").value || "HarmoniQ Original Melody" }
@@ -915,7 +914,7 @@ class UIManager {
         .map(
           pl => `
         <div class="playlist-select-item" data-plid="${pl.id}">
-          <div class="mini-cover" style="background: ${pl.coverGradient}">🎶</div>
+          <img src="${pl.coverUrl}" class="mini-cover" alt="${pl.title}">
           <div>
             <strong>${pl.title}</strong>
             <div class="muted-text">${pl.trackIds.length} tracks</div>

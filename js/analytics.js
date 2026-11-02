@@ -1,22 +1,17 @@
 /**
- * HarmoniQ Analytics & Taste Profiling Engine
+ * HarmoniQ Analytics – Minimalist Red & Black Edition
  * Generates dynamic SVG charts:
- * 1. Acoustic DNA Radar Chart (Energy, Valence, Danceability, Acousticness, Tempo)
+ * 1. Acoustic DNA Radar Chart
  * 2. Genre Affinity Donut Chart
- * 3. Listening Archetype & Year-in-Review Wrapped Card
+ * 3. Listening Archetype & Wrapped Card
  */
 
 class AnalyticsManager {
   constructor() {}
 
-  /**
-   * Computes user listening statistics from history and liked tracks
-   */
   getUserStats(user, tracks) {
     const history = user.history || [];
     const liked = user.likedTracks || [];
-
-    // Genre count
     const genreCounts = {};
     const trackMap = new Map(tracks.map(t => [t.id, t]));
 
@@ -25,11 +20,10 @@ class AnalyticsManager {
       const track = trackMap.get(item.trackId);
       if (track) {
         genreCounts[track.genre] = (genreCounts[track.genre] || 0) + 1;
-        totalDuration += track.duration || 180;
+        totalDuration += track.duration || 30;
       }
     });
 
-    // Also factor in liked tracks
     liked.forEach(trackId => {
       const track = trackMap.get(trackId);
       if (track) {
@@ -43,7 +37,7 @@ class AnalyticsManager {
     return {
       historyCount: history.length,
       likedCount: liked.length,
-      estimatedMinutes: Math.round(totalDuration / 60) + (liked.length * 4),
+      estimatedMinutes: Math.round(totalDuration / 60) + (liked.length * 3),
       genreCounts,
       tasteVector,
       archetype
@@ -51,63 +45,52 @@ class AnalyticsManager {
   }
 
   determineArchetype(vector) {
-    if (vector.energy > 0.75 && vector.bpm > 120) {
+    if (vector.energy > 0.75 && vector.bpm > 125) {
       return {
-        title: "High-Voltage Cyberpunk",
+        title: "High-Voltage Pulse",
         icon: "⚡",
-        description: "Your sonic pulse runs on heavy synths, driving rhythms, and unstoppable kinetic energy."
+        description: "Your taste runs on driving beats, high BPM synthwave, and relentless energy."
       };
     }
-    if (vector.acousticness > 0.75 && vector.energy < 0.4) {
+    if (vector.acousticness > 0.6 && vector.energy < 0.5) {
       return {
-        title: "Zen Lofi Monk",
-        icon: "🧘‍♂️",
-        description: "You seek peaceful acoustic spaces, vintage warmth, and calm frequencies for deep thought."
+        title: "Acoustic Minimalist",
+        icon: "🕯️",
+        description: "You gravitate toward delicate vocal production, quiet spaces, and warm strings."
       };
     }
     if (vector.valence > 0.7 && vector.danceability > 0.7) {
       return {
-        title: "Euphoric Groove Machine",
+        title: "Euphoric Groover",
         icon: "🪩",
-        description: "Your music radiates vibrant optimism, high spirits, and irresistible dance grooves."
-      };
-    }
-    if (vector.genres.includes("Ambient") || vector.genres.includes("Focus")) {
-      return {
-        title: "Deep Work Scholar",
-        icon: "📚",
-        description: "You masterfully tune out distraction with neural ambient drones and gentle study beats."
+        description: "Your library is filled with irresistible hooks, pop anthems, and vibrant rhythms."
       };
     }
     return {
-      title: "Eclectic Sonic Explorer",
-      icon: "🌌",
-      description: "You wander effortlessly across genres, chasing exceptional melodies wherever they live."
+      title: "Eclectic Connoisseur",
+      icon: "🎧",
+      description: "You navigate effortlessly across pop, hip-hop, indie, and electronic anthems."
     };
   }
 
-  /**
-   * Generates interactive SVG Radar Chart for Acoustic Dimensions
-   */
   renderRadarChart(containerId, vector) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const size = 260;
+    const size = 240;
     const center = size / 2;
-    const radius = 95;
+    const radius = 85;
     const labels = ["Energy", "Valence", "Dance", "Acoustic", "Tempo"];
     const values = [
-      vector.energy || 0.5,
-      vector.valence || 0.5,
-      0.65, // danceability
-      vector.acousticness || 0.5,
-      recommender.normalizeBpm(vector.bpm || 85)
+      vector.energy || 0.6,
+      vector.valence || 0.6,
+      0.75,
+      vector.acousticness || 0.3,
+      recommender.normalizeBpm(vector.bpm || 120)
     ];
 
     const angleStep = (Math.PI * 2) / labels.length;
 
-    // Background concentric polygon webs
     let websSvg = "";
     [0.25, 0.5, 0.75, 1.0].forEach(level => {
       let points = [];
@@ -117,24 +100,22 @@ class AnalyticsManager {
         const y = center + Math.sin(angle) * (radius * level);
         points.push(`${x},${y}`);
       }
-      websSvg += `<polygon points="${points.join(" ")}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.5" />`;
+      websSvg += `<polygon points="${points.join(" ")}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" />`;
     });
 
-    // Axis lines and labels
     let axesSvg = "";
     let labelsSvg = "";
     for (let i = 0; i < labels.length; i++) {
       const angle = i * angleStep - Math.PI / 2;
       const x = center + Math.cos(angle) * radius;
       const y = center + Math.sin(angle) * radius;
-      axesSvg += `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,0.12)" stroke-width="1" />`;
+      axesSvg += `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,0.1)" stroke-width="1" />`;
 
-      const lx = center + Math.cos(angle) * (radius + 20);
-      const ly = center + Math.sin(angle) * (radius + 20);
-      labelsSvg += `<text x="${lx}" y="${ly + 4}" fill="#a0aec0" font-size="11" text-anchor="middle" font-family="system-ui">${labels[i]}</text>`;
+      const lx = center + Math.cos(angle) * (radius + 18);
+      const ly = center + Math.sin(angle) * (radius + 18);
+      labelsSvg += `<text x="${lx}" y="${ly + 4}" fill="#888888" font-size="10.5" font-weight="600" text-anchor="middle">${labels[i]}</text>`;
     }
 
-    // Data polygon
     let dataPoints = [];
     for (let i = 0; i < values.length; i++) {
       const angle = i * angleStep - Math.PI / 2;
@@ -148,13 +129,13 @@ class AnalyticsManager {
       <svg width="${size}" height="${size}" viewBox="0 0 ${size}" class="radar-svg">
         <defs>
           <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.6"/>
-            <stop offset="100%" stop-color="#f857a6" stop-opacity="0.6"/>
+            <stop offset="0%" stop-color="#e50914" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#990000" stop-opacity="0.2"/>
           </linearGradient>
         </defs>
         ${websSvg}
         ${axesSvg}
-        <polygon points="${dataPoints.join(" ")}" fill="url(#radarGrad)" stroke="#00f2fe" stroke-width="2.5" />
+        <polygon points="${dataPoints.join(" ")}" fill="url(#radarGrad)" stroke="#e50914" stroke-width="2" />
         ${labelsSvg}
       </svg>
     `;
@@ -162,9 +143,6 @@ class AnalyticsManager {
     container.innerHTML = svg;
   }
 
-  /**
-   * Generates SVG Donut Chart for Genre Distribution
-   */
   renderGenreDonut(containerId, genreCounts) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -176,11 +154,11 @@ class AnalyticsManager {
     }
 
     const total = Object.values(genreCounts).reduce((a, b) => a + b, 0);
-    const colors = ["#00f2fe", "#9b51e0", "#f857a6", "#ffb300", "#00F260", "#4FACFE"];
+    const colors = ["#e50914", "#ff334b", "#b20710", "#ffffff", "#777777", "#ff6b81"];
 
     let currentAngle = 0;
-    const radius = 55;
-    const strokeWidth = 22;
+    const radius = 50;
+    const strokeWidth = 18;
     const circumference = 2 * Math.PI * radius;
 
     let slices = "";
@@ -194,7 +172,7 @@ class AnalyticsManager {
       const color = colors[idx % colors.length];
 
       slices += `
-        <circle cx="80" cy="80" r="${radius}" fill="none" stroke="${color}" stroke-width="${strokeWidth}"
+        <circle cx="70" cy="70" r="${radius}" fill="none" stroke="${color}" stroke-width="${strokeWidth}"
           stroke-dasharray="${strokeDash}" stroke-dashoffset="${strokeOffset}" stroke-linecap="round" />
       `;
 
@@ -211,10 +189,10 @@ class AnalyticsManager {
 
     const svg = `
       <div class="donut-wrapper">
-        <svg width="160" height="160" viewBox="0 0 160 160">
-          <circle cx="80" cy="80" r="${radius}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="${strokeWidth}" />
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="${radius}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="${strokeWidth}" />
           ${slices}
-          <text x="80" y="85" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">Genres</text>
+          <text x="70" y="74" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">Top Genres</text>
         </svg>
         <div class="donut-legend">${legendItems}</div>
       </div>

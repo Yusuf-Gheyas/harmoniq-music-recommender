@@ -1,15 +1,14 @@
 /**
  * HarmoniQ Storage Manager
- * Persistent state management using LocalStorage with fallback support,
- * automated migration, and sample data seeding.
+ * Persistent state management using LocalStorage with automated schema migration.
  */
 
 const STORAGE_KEYS = {
-  TRACKS: "harmoniq_tracks",
-  USERS: "harmoniq_users",
-  CURRENT_USER_ID: "harmoniq_current_user_id",
-  PLAYLISTS: "harmoniq_playlists",
-  SETTINGS: "harmoniq_settings"
+  TRACKS: "harmoniq_tracks_v2",
+  USERS: "harmoniq_users_v2",
+  CURRENT_USER_ID: "harmoniq_current_user_id_v2",
+  PLAYLISTS: "harmoniq_playlists_v2",
+  SETTINGS: "harmoniq_settings_v2"
 };
 
 class StorageManager {
@@ -18,30 +17,19 @@ class StorageManager {
   }
 
   init() {
-    if (!localStorage.getItem(STORAGE_KEYS.TRACKS)) {
-      localStorage.setItem(STORAGE_KEYS.TRACKS, JSON.stringify(SEED_TRACKS));
+    const existing = localStorage.getItem(STORAGE_KEYS.TRACKS);
+    if (!existing) {
+      this.resetAll();
+      return;
     }
-    if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
-      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(SEED_USERS));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID)) {
-      localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, "user_yusuf");
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.PLAYLISTS)) {
-      localStorage.setItem(STORAGE_KEYS.PLAYLISTS, JSON.stringify(SEED_PLAYLISTS));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
-      const defaultSettings = {
-        theme: "dark",
-        volume: 0.75,
-        eqPreset: "flat",
-        eqGains: [0, 0, 0, 0, 0],
-        ambientPreset: null,
-        ambientVolume: 0.25,
-        repeatMode: "all", // "off", "all", "one"
-        shuffle: false
-      };
-      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(defaultSettings));
+
+    try {
+      const parsed = JSON.parse(existing);
+      if (!parsed || !parsed.length || !parsed[0].coverUrl) {
+        this.resetAll();
+      }
+    } catch (e) {
+      this.resetAll();
     }
   }
 
@@ -70,25 +58,23 @@ class StorageManager {
       title: trackData.title || "Untitled Track",
       artist: trackData.artist || "Independent Artist",
       album: trackData.album || "Single",
-      genre: trackData.genre || "Lofi",
-      mood: trackData.mood || "Chill",
-      bpm: parseInt(trackData.bpm) || 90,
-      energy: parseFloat(trackData.energy) || 0.5,
-      valence: parseFloat(trackData.valence) || 0.5,
-      danceability: parseFloat(trackData.danceability) || 0.5,
-      acousticness: parseFloat(trackData.acousticness) || 0.5,
-      instrumentalness: parseFloat(trackData.instrumentalness) || 0.8,
-      duration: parseInt(trackData.duration) || 160,
+      genre: trackData.genre || "Pop",
+      mood: trackData.mood || "Hype",
+      bpm: parseInt(trackData.bpm) || 120,
+      energy: parseFloat(trackData.energy) || 0.7,
+      valence: parseFloat(trackData.valence) || 0.6,
+      danceability: parseFloat(trackData.danceability) || 0.7,
+      acousticness: parseFloat(trackData.acousticness) || 0.2,
+      instrumentalness: parseFloat(trackData.instrumentalness) || 0.0,
+      duration: 30,
       plays: 1,
       likes: 0,
       releaseYear: new Date().getFullYear(),
-      synthType: trackData.synthType || "lofi_chill",
-      coverGradient: trackData.coverGradient || "linear-gradient(135deg, #FF6B6B, #556270)",
-      coverIcon: trackData.coverIcon || "🎵",
-      audioUrl: trackData.audioUrl || "",
+      coverUrl: trackData.coverUrl || "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/71/12/03/711203e0-f7b9-9f4e-caff-540736fda45c/20UMGIM25005.rgb.jpg/600x600bb.jpg",
+      audioUrl: trackData.audioUrl || "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/0a/f5/7a/0af57ad0-56bd-7665-e7c4-efccb337866b/mzaf_11974826629383453.plus.aac.p.m4a",
       lyrics: trackData.lyrics || [
-        { time: 5, text: "New track uploaded to HarmoniQ" },
-        { time: 20, text: "Enjoy the sonic frequencies..." }
+        { time: 2, text: "HarmoniQ community release" },
+        { time: 10, text: "Streaming high quality audio" }
       ]
     };
     tracks.unshift(newTrack);
@@ -116,12 +102,11 @@ class StorageManager {
     const currentUser = this.getCurrentUser();
     if (!currentUser) return false;
 
-    let liked = false;
     if (!currentUser.likedTracks) currentUser.likedTracks = [];
-
     const index = currentUser.likedTracks.indexOf(trackId);
     const tracks = this.getTracks();
     const track = tracks.find(t => t.id === trackId);
+    let liked = false;
 
     if (index > -1) {
       currentUser.likedTracks.splice(index, 1);
@@ -152,11 +137,6 @@ class StorageManager {
     }
   }
 
-  getUser(id) {
-    const users = this.getUsers();
-    return users.find(u => u.id === id) || null;
-  }
-
   getCurrentUser() {
     const userId = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
     const users = this.getUsers();
@@ -176,26 +156,14 @@ class StorageManager {
     }
   }
 
-  switchRole(role) {
-    const users = this.getUsers();
-    const match = users.find(u => u.role === role);
-    if (match) {
-      this.setCurrentUser(match.id);
-      return match;
-    }
-    return this.getCurrentUser();
-  }
-
   addToHistory(trackId) {
     const user = this.getCurrentUser();
     if (!user) return;
     if (!user.history) user.history = [];
 
-    // Filter out previous entry if present to push most recent to front
     user.history = user.history.filter(h => h.trackId !== trackId);
     user.history.unshift({ trackId, timestamp: Date.now() });
 
-    // Keep max 50 entries
     if (user.history.length > 50) user.history.pop();
     this.updateUser(user);
   }
@@ -216,47 +184,23 @@ class StorageManager {
   createPlaylist(title, description, trackIds = []) {
     const user = this.getCurrentUser();
     const playlists = this.getPlaylists();
-    const gradients = [
-      "linear-gradient(135deg, #667eea, #764ba2)",
-      "linear-gradient(135deg, #ff758c, #ff7eb3)",
-      "linear-gradient(135deg, #00c6ff, #0072ff)",
-      "linear-gradient(135deg, #f857a6, #ff5858)",
-      "linear-gradient(135deg, #43e97b, #38f9d7)"
+    const sampleCovers = [
+      "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/71/12/03/711203e0-f7b9-9f4e-caff-540736fda45c/20UMGIM25005.rgb.jpg/600x600bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/6c/11/d6/6c11d681-aa3a-d59e-4c2e-f77e181026ab/190295092665.jpg/600x600bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e8/43/5f/e8435ffa-b6b9-b171-40ab-4ff3959ab661/886443919266.jpg/600x600bb.jpg"
     ];
     const newPlaylist = {
       id: "pl_" + Date.now(),
-      title: title || "New Sonic Playlist",
+      title: title || "New Playlist",
       description: description || "Curated in HarmoniQ",
       creatorId: user ? user.id : "anonymous",
       creatorName: user ? user.name : "Guest",
-      coverGradient: gradients[Math.floor(Math.random() * gradients.length)],
+      coverUrl: sampleCovers[Math.floor(Math.random() * sampleCovers.length)],
       trackIds: trackIds
     };
     playlists.push(newPlaylist);
     this.savePlaylists(playlists);
     return newPlaylist;
-  }
-
-  addTrackToPlaylist(playlistId, trackId) {
-    const playlists = this.getPlaylists();
-    const pl = playlists.find(p => p.id === playlistId);
-    if (pl && !pl.trackIds.includes(trackId)) {
-      pl.trackIds.push(trackId);
-      this.savePlaylists(playlists);
-      return true;
-    }
-    return false;
-  }
-
-  removeTrackFromPlaylist(playlistId, trackId) {
-    const playlists = this.getPlaylists();
-    const pl = playlists.find(p => p.id === playlistId);
-    if (pl) {
-      pl.trackIds = pl.trackIds.filter(id => id !== trackId);
-      this.savePlaylists(playlists);
-      return true;
-    }
-    return false;
   }
 
   deletePlaylist(playlistId) {
@@ -265,47 +209,11 @@ class StorageManager {
     this.savePlaylists(playlists);
   }
 
-  // --- SETTINGS ---
-  getSettings() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || {};
-    } catch (e) {
-      return {};
-    }
-  }
-
-  updateSettings(updates) {
-    const current = this.getSettings();
-    const merged = { ...current, ...updates };
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(merged));
-    return merged;
-  }
-
-  // --- BACKUP & RESET ---
   resetAll() {
-    localStorage.removeItem(STORAGE_KEYS.TRACKS);
-    localStorage.removeItem(STORAGE_KEYS.USERS);
-    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
-    localStorage.removeItem(STORAGE_KEYS.PLAYLISTS);
-    localStorage.removeItem(STORAGE_KEYS.SETTINGS);
-    this.init();
-  }
-
-  exportData() {
-    return {
-      tracks: this.getTracks(),
-      users: this.getUsers(),
-      playlists: this.getPlaylists(),
-      settings: this.getSettings(),
-      exportedAt: new Date().toISOString()
-    };
-  }
-
-  importData(dataObj) {
-    if (dataObj.tracks) this.saveTracks(dataObj.tracks);
-    if (dataObj.users) localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(dataObj.users));
-    if (dataObj.playlists) this.savePlaylists(dataObj.playlists);
-    if (dataObj.settings) this.updateSettings(dataObj.settings);
+    localStorage.setItem(STORAGE_KEYS.TRACKS, JSON.stringify(SEED_TRACKS));
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(SEED_USERS));
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, "user_yusuf");
+    localStorage.setItem(STORAGE_KEYS.PLAYLISTS, JSON.stringify(SEED_PLAYLISTS));
   }
 }
 

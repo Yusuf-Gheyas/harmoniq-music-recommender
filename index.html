@@ -92,15 +92,14 @@
         <!-- Genre Filter Row -->
         <div class="pill-row">
           <button class="genre-pill active" data-genre="All">All Genres</button>
-          <button class="genre-pill" data-genre="Lofi">Lofi</button>
+          <button class="genre-pill" data-genre="Pop">Pop</button>
           <button class="genre-pill" data-genre="Synthwave">Synthwave</button>
-          <button class="genre-pill" data-genre="Chillhop">Chillhop</button>
-          <button class="genre-pill" data-genre="Cyberpunk">Cyberpunk</button>
-          <button class="genre-pill" data-genre="Ambient">Ambient</button>
-          <button class="genre-pill" data-genre="Classical">Classical</button>
+          <button class="genre-pill" data-genre="Hip-Hop">Hip-Hop</button>
+          <button class="genre-pill" data-genre="Rock">Rock</button>
+          <button class="genre-pill" data-genre="Alternative">Alternative</button>
+          <button class="genre-pill" data-genre="R&B/Soul">R&B/Soul</button>
           <button class="genre-pill" data-genre="EDM">EDM</button>
-          <button class="genre-pill" data-genre="Acoustic">Acoustic</button>
-          <button class="genre-pill" data-genre="Indie Pop">Indie Pop</button>
+          <button class="genre-pill" data-genre="Funk / Disco">Funk / Disco</button>
         </div>
 
         <!-- Section: Personalized Recommendations -->
@@ -338,8 +337,8 @@
                 <input type="url" id="upAudioUrl" class="form-control" placeholder="https://...mp3 (or leave blank for Web Audio synth)">
               </div>
               <div class="form-group">
-                <label>Cover Icon</label>
-                <input type="text" id="upIcon" class="form-control" value="🎶" maxlength="2">
+                <label>Album Artwork URL</label>
+                <input type="url" id="upCoverUrl" class="form-control" placeholder="https://...image.jpg">
               </div>
               <div class="form-group">
                 <label>Lyrics (Sample line)</label>
@@ -399,10 +398,12 @@
     <footer class="app-player">
       <!-- Left: Track info -->
       <div class="player-left">
-        <div class="player-cover" id="playerCover">🌙</div>
+        <div class="player-cover" id="playerCover">
+          <img src="https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/71/12/03/711203e0-f7b9-9f4e-caff-540736fda45c/20UMGIM25005.rgb.jpg/600x600bb.jpg" class="player-cover-img" alt="Blinding Lights">
+        </div>
         <div class="player-info">
-          <span class="player-title" id="playerTitle">Midnight Reverie</span>
-          <span class="player-artist" id="playerArtist">Aura Luna • Nocturnal Echoes</span>
+          <span class="player-title" id="playerTitle">Blinding Lights</span>
+          <span class="player-artist" id="playerArtist">The Weeknd • After Hours</span>
         </div>
         <button class="player-like-btn" id="playerLikeBtn" title="Like track">🤍</button>
       </div>
@@ -418,8 +419,8 @@
         </div>
         <div class="timeline-container">
           <span class="time-text" id="playerCurrentTime">0:00</span>
-          <input type="range" class="seek-bar" id="playerSeek" min="0" max="100" value="0">
-          <span class="time-text" id="playerDurationTime">2:45</span>
+          <input type="range" class="seek-bar" id="playerSeek" min="0" max="30" value="0">
+          <span class="time-text" id="playerDurationTime">0:30</span>
         </div>
       </div>
 

@@ -1,10 +1,9 @@
 /**
- * HarmoniQ Canvas Visualizer
+ * HarmoniQ Canvas Visualizer – Red & Black Aesthetic
  * Real-time audio spectrum visualization engine supporting:
- * 1. Neon Spectrum Frequency Bars
- * 2. Radial Circular Pulsing Halo
+ * 1. Crimson Spectrum Frequency Bars
+ * 2. Radial Pulsing Halo
  * 3. Fluid Waveform Oscilloscope
- * Includes smooth idle state animations.
  */
 
 class AudioVisualizer {
@@ -25,11 +24,11 @@ class AudioVisualizer {
     if (!this.canvas) return;
     const rect = this.canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    this.canvas.width = (rect.width || 320) * dpr;
-    this.canvas.height = (rect.height || 64) * dpr;
+    this.canvas.width = (rect.width || 240) * dpr;
+    this.canvas.height = (rect.height || 48) * dpr;
     this.ctx.scale(dpr, dpr);
-    this.width = rect.width || 320;
-    this.height = rect.height || 64;
+    this.width = rect.width || 240;
+    this.height = rect.height || 48;
   }
 
   setMode(mode) {
@@ -63,8 +62,8 @@ class AudioVisualizer {
   }
 
   drawBars(freqData, isPlaying) {
-    const barCount = 32;
-    const gap = 3;
+    const barCount = 28;
+    const gap = 2;
     const barWidth = (this.width - (barCount - 1) * gap) / barCount;
     this.idlePhase += 0.04;
 
@@ -73,45 +72,40 @@ class AudioVisualizer {
       if (isPlaying && freqData && freqData.length > i * 2) {
         val = freqData[i * 2] / 255;
       } else {
-        // Subtle ambient idle breathing
-        val = Math.sin(this.idlePhase + i * 0.25) * 0.12 + 0.15;
+        val = Math.sin(this.idlePhase + i * 0.28) * 0.08 + 0.12;
       }
 
-      const barHeight = Math.max(3, val * (this.height - 8));
+      const barHeight = Math.max(2, val * (this.height - 4));
       const x = i * (barWidth + gap);
       const y = this.height - barHeight;
 
-      // Dynamic color gradient (Cyan -> Magenta -> Violet)
+      // Crimson to bright red gradient
       const gradient = this.ctx.createLinearGradient(0, this.height, 0, y);
-      gradient.addColorStop(0, "rgba(0, 242, 254, 0.85)");
-      gradient.addColorStop(0.5, "rgba(79, 172, 254, 0.9)");
-      gradient.addColorStop(1, "rgba(248, 87, 166, 0.95)");
+      gradient.addColorStop(0, "#990000");
+      gradient.addColorStop(0.5, "#e50914");
+      gradient.addColorStop(1, "#ff334b");
 
       this.ctx.fillStyle = gradient;
-      this.roundRect(x, y, barWidth, barHeight, 3);
+      this.roundRect(x, y, barWidth, barHeight, 2);
       this.ctx.fill();
     }
   }
 
   drawWave(freqData, isPlaying) {
     this.ctx.beginPath();
-    this.ctx.lineWidth = 3;
-    const gradient = this.ctx.createLinearGradient(0, 0, this.width, 0);
-    gradient.addColorStop(0, "#00f2fe");
-    gradient.addColorStop(0.5, "#9b51e0");
-    gradient.addColorStop(1, "#f857a6");
-    this.ctx.strokeStyle = gradient;
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeStyle = "#e50914";
 
-    const points = 48;
+    const points = 40;
     const sliceWidth = this.width / (points - 1);
     this.idlePhase += 0.05;
 
     for (let i = 0; i < points; i++) {
       let amp = 0;
       if (isPlaying && freqData) {
-        amp = (freqData[i % freqData.length] / 255 - 0.5) * (this.height * 0.8);
+        amp = (freqData[i % freqData.length] / 255 - 0.5) * (this.height * 0.75);
       } else {
-        amp = Math.sin(this.idlePhase + i * 0.3) * (this.height * 0.15);
+        amp = Math.sin(this.idlePhase + i * 0.35) * (this.height * 0.12);
       }
 
       const x = i * sliceWidth;
@@ -126,17 +120,17 @@ class AudioVisualizer {
   drawRadial(freqData, isPlaying) {
     const centerX = this.width / 2;
     const centerY = this.height / 2;
-    const radius = Math.min(centerX, centerY) * 0.6;
-    const count = 36;
+    const radius = Math.min(centerX, centerY) * 0.65;
+    const count = 30;
     this.idlePhase += 0.03;
 
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2;
       let val = 0;
       if (isPlaying && freqData) {
-        val = (freqData[i % freqData.length] / 255) * 18;
+        val = (freqData[i % freqData.length] / 255) * 14;
       } else {
-        val = Math.sin(this.idlePhase + i * 0.3) * 5 + 4;
+        val = Math.sin(this.idlePhase + i * 0.35) * 3 + 2;
       }
 
       const x1 = centerX + Math.cos(angle) * radius;
@@ -147,8 +141,8 @@ class AudioVisualizer {
       this.ctx.beginPath();
       this.ctx.moveTo(x1, y1);
       this.ctx.lineTo(x2, y2);
-      this.ctx.strokeStyle = `hsl(${(i / count) * 360}, 85%, 65%)`;
-      this.ctx.lineWidth = 2.5;
+      this.ctx.strokeStyle = (i % 2 === 0) ? "#e50914" : "#ff334b";
+      this.ctx.lineWidth = 2;
       this.ctx.stroke();
     }
   }
